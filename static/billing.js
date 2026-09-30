@@ -1,0 +1,8 @@
+let cart=[];
+function add(id,name,price,stock){let x=cart.find(i=>i.id===id);if(x){if(x.qty<stock)x.qty++;}else cart.push({id,name,price,stock,qty:1});render()}
+function removeItem(id){cart=cart.filter(x=>x.id!==id);render()}
+function render(){let el=document.getElementById('cart');el.innerHTML='';let sub=0;cart.forEach(x=>{sub+=x.price*x.qty;el.innerHTML+=`<div class="cart-row"><div><b>${x.name}</b><small>₹${x.price} × ${x.qty}</small></div><input type="number" min="1" max="${x.stock}" value="${x.qty}" onchange="changeQty(${x.id},this.value)"><b>₹${(x.price*x.qty).toFixed(2)}</b><button class="danger small" onclick="removeItem(${x.id})">×</button></div>`});let d=Math.min(parseFloat(document.getElementById('discount').value||0),sub);let tax=(sub-d)*(parseFloat(document.getElementById('tax').value||0)/100);document.getElementById('total').textContent='₹'+(sub-d+tax).toFixed(2)}
+function changeQty(id,q){let x=cart.find(i=>i.id===id);x.qty=Math.max(1,Math.min(x.stock,parseInt(q)||1));render()}
+function filterProducts(){let q=document.getElementById('search').value.toLowerCase();document.querySelectorAll('.product').forEach(x=>x.style.display=x.dataset.name.includes(q)?'flex':'none')}
+async function checkout(){if(!cart.length)return alert('Cart is empty');let r=await fetch('/api/bill',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({items:cart.map(x=>({product_id:x.id,qty:x.qty})),discount:document.getElementById('discount').value,tax_rate:document.getElementById('tax').value,payment_method:document.getElementById('payment').value})});let d=await r.json();if(!r.ok)return alert(d.error);location.href='/invoice/'+d.sale_id}
+render();
