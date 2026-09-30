@@ -212,5 +212,7 @@ def reports():
 def api_products():
     c=db(); rows=c.execute('SELECT id,name,sku,price,stock FROM products WHERE stock>0 ORDER BY name').fetchall(); c.close(); return jsonify([dict(x) for x in rows])
 
+init_db()
+
 if __name__=='__main__':
-    init_db(); app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT',5000)))
+    app.run(debug=os.environ.get('FLASK_DEBUG')=='1', host='0.0.0.0', port=int(os.environ.get('PORT',5000)))
